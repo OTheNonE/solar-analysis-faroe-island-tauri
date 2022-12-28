@@ -1,0 +1,40 @@
+{
+  "name": "solar-analysis-faroe-island",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^1.1.0",
+    "chart.js": "^4.1.1",
+    "convert-array-to-csv": "^2.0.0",
+    "file-saver": "^2.0.5",
+    "geotiff": "^2.0.7",
+    "leaflet": "^1.9.3",
+    "proj4": "^2.8.0",
+    "proj4leaflet": "^1.0.2",
+    "require": "^0.4.4",
+    "requirejs": "^2.3.6",
+    "split-grid": "^1.0.11",
+    "suncalc": "^1.9.0",
+    "vite-tsconfig-paths": "^4.0.3"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^1.0.1",
+    "@tauri-apps/cli": "^1.1.0",
+    "@tsconfig/svelte": "^3.0.0",
+    "@types/node": "^18.7.10",
+    "svelte": "^3.49.0",
+    "svelte-check": "^2.8.0",
+    "svelte-preprocess": "^4.10.7",
+    "tslib": "^2.4.0",
+    "typescript": "^4.6.4",
+    "vite": "^3.0.2"
+  }
+}
