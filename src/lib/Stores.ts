@@ -1,6 +1,7 @@
+import type { Chart, ChartDataset } from 'chart.js';
 import type { GeoTIFFImage } from 'geotiff';
+import type { LeafletEventHandlerFnMap } from 'leaflet';
 import { writable } from 'svelte/store';
-import type { Point } from 'src/lib/Functions';
 
 interface HeightMap {
   map: GeoTIFFImage,
@@ -18,52 +19,112 @@ interface HeightMap {
   }
 }
 
+export type ChartTypes = 'Hillshade' | 'Sunrise' | 'Sunset';
+
+export interface Point extends Dir, Pos {
+  h: number,
+  d: number,
+  r: number,
+}
+
+export interface Dir {
+  azi: number,
+  alt: number,
+}
+
+export interface Sun {
+  dataset: ChartDataset,
+  show: boolean,
+  color: string,
+  date: string,
+}
+
+export interface Pos {
+  x: number,
+  y: number,
+}
+
+export interface Crd {
+  lat: number,
+  lng: number,
+}
+
 interface Settings {
   dv: number,
   radius: number,
   d_min: number,
+  center_of_FO: {x: number, y: number},
 }
 
-interface CrdSys {
+interface CoordinateSystem {
   name: string,
   conv: string,
 }
 
-interface Info {
-  crd: {lng: number, lat: number}
-  pos: {x: number, y: number}
+interface Marker {
+  onMap: L.Marker,
+  crd: Crd,
+  pos: Pos,
   mapHeight: number,
-  mountainCurve: Point[]
+}
+
+interface Polyline {
+  crds: Crd[],
+  onMap: L.Polyline,
+}
+
+export interface Ridge {
+  label: string,
+  color: string,
+  points: Point[],
+  dataset: ChartDataset,
+  marker: Marker,
+  polyline: Polyline,
+}
+
+interface Stored {
+  ridges: Ridge[]
+}
+
+interface ChartWindow {
+  chartType: ChartTypes,
+  chart: Chart,
+  selected: Ridge[],
+  sun: Sun,
+
 }
 
 interface Container {
-  leaf: any,
-  crdSys: {
-    [index: string]: CrdSys
+  coordinateSystem: {
+    [index: string]: CoordinateSystem
   },
-  marker: any,
-  map: any,
+  chart: ChartWindow,
+  map: L.Map,
   heightMap: HeightMap,
-  info: Info,
+  stored: Stored,
   settings: Settings,
 }
 
 let container: Container = {
-  leaf: undefined,
-  crdSys: {},
-  marker: {},
-  map: {},
-  heightMap: undefined,
-  info: {
-    pos: {x: 0, y: 0},
-    crd: {lng: 0, lat: 0},
-    mapHeight: 0,
-    mountainCurve: undefined,
+  coordinateSystem: {},
+  map: undefined,
+  chart: {
+    chart: undefined,
+    selected: [],
+    sun: undefined,
+    chartType: 'Hillshade',
   },
+  heightMap: undefined,
+
+  stored: {
+    ridges: []
+  }, 
+
   settings: {
     dv: 1,
-    radius: 6000 / 2,
+    radius: 4000 / 2,
     d_min: 100,
+    center_of_FO: {x: 205700, y: 884500}
   },
 };
 

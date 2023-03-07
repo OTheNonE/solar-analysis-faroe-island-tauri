@@ -1,135 +1,125 @@
+
 <script lang="ts">
-  // Imports:
+
+  // Svelte imports:
   import { onMount } from 'svelte';
-  import { system } from 'src/lib/Stores';
-  import { convertLatLngToPos, convertPosToPixel, getSingleHeight } from './Functions';
-  import L from 'leaflet';
-  import 'proj4leaflet'
+  import { get } from 'svelte/store';
 
-  const kortalUrlHaedd = 'https://gis.us.fo/arcgis/services/haeddarkurvar/us_haeddarkurvar_2009_2m/MapServer/WMSServer';
-  const kortalUrlMynd = 'https://gis.us.fo/arcgis/services/myndakort/us_myndakort_fotm/MapServer/WMSServer'
-  const EPSG5136value = '+proj=tmerc +lat_0=0 +lon_0=-7 +k=0.999997 +x_0=200000 +y_0=-6000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs'
+  // Library imports:
+  import L, { type LatLngExpression } from 'leaflet';
+  import 'proj4leaflet';
 
+  // Imports from Stores.svelte:
+  import { system, type Crd, type Ridge, type Pos } from 'src/lib/Stores';
 
-  // Define the global variable L to new variable:
-  $system.leaf = L;
-  
-  // Define variable in this scope.
-  var theMarker
+  // Map settings.
+  const EPSG5136value = '+proj=tmerc +lat_0=0 +lon_0=-7 +k=0.999997 +x_0=200000 +y_0=-6000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs';
+  const kortalUrlLendis = 'https://gis.us.fo/arcgis/services/lendiskort/us_lendiskort/MapServer/WMSServer'
 
   // Center of map.
-  var center = [62, -7];
-  
+  let center: LatLngExpression = [61.9, -6.85];
+
+  // The CRS:
+  let crs = new L.Proj.CRS('EPSG:5316', EPSG5136value, {
+    origin: [-5423100, 4002100],
+    resolutions: [
+      1083.735500804335,
+      541.8677504021675,
+      270.93387520108377,
+      135.46693760054188,
+      67.73346880027094,
+      33.86673440013547,
+      16.933367200067735,
+      8.466683600033868,
+      4.233341800016934,
+      2.116670900008467,
+      1.0583354500042335,
+      0.5291677250021167,
+      0.26458386250105836,
+      0.13229193125052918,
+      0.06614596562526459,
+    ],
+  })
+
+  // Dynamically updating variables:
+  $: selectedRidges = $system.chart.selected;
+  $: storedRidges = $system.stored.ridges;
+  $: updateLayersInMap(selectedRidges, storedRidges);
+
+  function updateLayersInMap(selected: Ridge[], stored: Ridge[]) {
+
+    stored.forEach(st => {
+      $system.map.removeLayer(st.marker.onMap)
+      $system.map.removeLayer(st.polyline.onMap)
+    })
+
+    selected.forEach(sel => {
+      sel.marker.onMap.addTo($system.map)
+      sel.polyline.onMap.addTo($system.map)
+    })
+  }
+
+  function resizeMap() {
+    if($system.map) {$system.map.invalidateSize()}
+  }
+
   onMount(() => {
-    
-    var crs = new L.Proj.CRS('EPSG:4326', EPSG5136value, {
-      origin: [-5423100, 4002100],
-      resolutions: [
-        1083.735500804335,
-        541.8677504021675,
-        270.93387520108377,
-        135.46693760054188,
-        67.73346880027094,
-        33.86673440013547,
-        16.933367200067735,
-        8.466683600033868,
-        4.233341800016934,
-        2.116670900008467,
-        1.0583354500042335,
-        0.5291677250021167,
-        0.26458386250105836,
-        0.13229193125052918,
-        0.06614596562526459,
-      ],
+
+    $system.map = L.map('leafletmap', {
+      crs,
+      maxZoom: 14,
+      minZoom: 0,
     })
 
-    $system.map = $system.leaf.map('map', {
-      // crs: crs,
-    })
-
-    $system.leaf.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 20,
-      minZoom: 8,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    var wmsLayerLendis = L.tileLayer.wms(kortalUrlLendis, {
+      layers: 'Sjógvur,Oyggjar - bólkur,Brúksøki,Hillshade - bólkur,Strandalinja,Áir,Bygningar,Vegir - bólkur,Bygdir - bólkur',
+      format: 'image/png',
+      version: '1.3.0',
+      crs,
     }).addTo($system.map);
 
-    // var wmsLayerHaedd = $data.leaf.tileLayer.wms(kortalUrlHaedd, {
-    //   maxZoom: 20,
-    //   minZoom: 8,
-    // }).addTo($data.map);
+    // L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //   crs: crs,
+    //   attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    // }).addTo($system.map);
 
-    // var wmsLayerMynd = $data.leaf.tileLayer.wms(kortalUrlMynd, {
-    //   maxZoom: 20,
-    //   minZoom: 8,
-    // }).addTo($data.map);
+    // var wmsLayerMynd = L.tileLayer.wms(kortalUrlMynd, {
+    //   layers: '0',
+    //   format: 'image/png',
+    //   // version: '1.3.0',
+    //   crs: crs,
+    // }).addTo($system.map);
 
-    $system.map.setView(center, 8);
+    // var wmsLayerHaedd = L.tileLayer.wms(kortalUrlHaedd, {
+    //   // Layer numbering:
+    //   // '0' to '3' show in Zoom=14-9
+    //   // '4' to '6' show in Zoom=8-7, 
+    //   // '7' to '9' show in Zoom=6
+    //   // '10' to '11' show in Zoom=5-1
+    //   // The main layers are: 0, 4, 7, 10 (For the related zoom).
+    //   layers: '0,4,7,10',
+    //   format: 'image/png',
+    //   // version: '1.3.0',
+    //   crs: crs,
+    //   transparent: true,
+    // }).addTo($system.map);
 
-    // map.on('moveend', function() {
-    // 	console.log(map.getBounds())
-    // })
+    $system.map.setView(center, 2);
 
-    var greenIcon = $system.leaf.icon({
-      iconUrl:	'src/Image/leaf-green.png',
-
-      iconSize:		[38, 95],
-      iconAnchor:		[0, 0],
-      popupAnchor:	[0, 0]
-
-      
-
-    })
-
-    $system.map.on('click', (e) => {
-      mapClick(e)
-    })
-    
   })
-  
-
-  async function mapClick(e) {
-
-    var crd = {
-      lat: e.latlng.lat,
-      lng: e.latlng.lng
-    }
-
-    placeMarker(crd)
-    const pos = convertLatLngToPos(crd)
-    const px = convertPosToPixel(pos)
-
-    console.log(px)
-
-    const height = await getSingleHeight(px)
-
-    $system.info.crd = crd;
-    $system.info.pos = pos;
-    $system.info.mapHeight = height;
-  }
-
-  function placeMarker(pos: ({lat: Number, lng: Number})) {
-    // Add marker to map at click location; add popup window
-    if (theMarker != undefined) {
-      $system.map.removeLayer(theMarker);
-    }
-
-    theMarker = new $system.leaf.marker(pos).addTo($system.map);
-  }
 
 
 </script>
 
-<div id="map">
-
-</div>
-
-
-
+<div id="leafletmap" on:resize={resizeMap}/>
+<svelte:window on:resize={resizeMap}/>
 
 <style>
-  #map { 
+  #leafletmap { 
+    position: absolute;
     height: 100%;
     width: 100%;
+    z-index: 1;
   }
 
 </style>

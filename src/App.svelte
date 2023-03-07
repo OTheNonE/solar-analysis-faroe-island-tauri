@@ -1,13 +1,28 @@
 
 <script>
+
+  // Svelte imports:
   import { onMount } from 'svelte';
-  import Map from "./lib/Map.svelte";
-  import Inputs from "./lib/Inputs.svelte";
-  import * as bara_fyri_at_kompila from 'src/lib/Load';
-  import Chart from "./lib/Chart.svelte";
+
+  // Library imports:
   import Split from 'split-grid';
 
-  let rowSplitter, columnSplitter;
+  // Imports from Stores.svelte:
+  import { system } from 'src/lib/Stores';
+
+  // Imports from function typescript files:
+
+  // Components imports:
+  import Map from "./lib/Map.svelte";
+  import Inputs from "./lib/Inputs.svelte";
+  import ChartVisual from './lib/ChartVisual.svelte';
+
+  // Yeaah...
+  import * as only_for_compiling1 from 'src/lib/Load';
+  import * as only_for_compiling2 from 'src/lib/Functions/RidgePopup';
+    import CurrentPosition from './lib/CurrentPosition.svelte';
+
+  let rowSplitter //, columnSplitter;
 
   onMount(() => {
 		Split({
@@ -15,10 +30,11 @@
 				track: 1,
 				element: rowSplitter,
 			}],
-			columnGutters: [{
-				track: 1,
-				element: columnSplitter,
-			}],
+      
+			// columnGutters: [{
+			// 	track: 1,
+			// 	element: columnSplitter,
+			// }],
 		})
 	});
   
@@ -32,13 +48,14 @@
 	</div>
 	<div class="map">
     <Map/>
+    <CurrentPosition/>
 	</div>
 	<div class="chart">
-    <Chart/>
+    <ChartVisual/>
 	</div>
 
 	<div class="row-splitter" bind:this={rowSplitter} />
-	<div class="column-splitter" bind:this={columnSplitter} />
+	<div class="column-splitter"/>
 </div>
 
 <style>
@@ -50,7 +67,7 @@
       'r-split  c-split rights'
       'bottom   c-split rights';
     grid-template-rows: 1fr 5px 1fr;
-    grid-template-columns: 1fr 5px 1fr;
+    grid-template-columns: auto 5px 300px;
     width: 100vw;
     height: 100vh;
   }
@@ -61,11 +78,13 @@
   }
 
   .map {
+    position: relative;
     overflow: hidden;
     grid-area: top;
   }
 
   .chart {
+    display: flex;
     /* overflow: hidden; */
     min-width: 0;
     min-height: 0;
@@ -80,7 +99,6 @@
 
   .column-splitter {
     grid-area: c-split;
-    cursor: col-resize;
     background-color: grey;
   }
 

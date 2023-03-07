@@ -25,7 +25,7 @@ fetch(epsg5316Url)
   .then(response  => response.text())
   .then(result    => {
 
-    get(system).crdSys['EPSG5316'] = {
+    get(system).coordinateSystem['EPSG5316'] = {
       name: 'EPSG5316',
       conv: result,
     }
@@ -37,7 +37,7 @@ fetch(epsg4326Url)
   .then(response  => response.text())
   .then(result    => {
 
-    get(system).crdSys['EPSG4326'] = {
+    get(system).coordinateSystem['EPSG4326'] = {
       name: 'EPSG4326',
       conv: result,
     }

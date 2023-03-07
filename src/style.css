@@ -29,16 +29,6 @@ body {
 }
 
 
-
-.container {
-  margin: 0;
-  padding-top: 10vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -69,7 +59,7 @@ h1 {
   text-align: center;
 }
 
-input,
+/* input,
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -81,7 +71,7 @@ button {
   background-color: #ffffff;
   transition: border-color 0.25s;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
+} */
 
 button {
   cursor: pointer;
