@@ -4,6 +4,7 @@
   // Svelte imports:
   import { onMount } from 'svelte';
   import { get } from 'svelte/store';
+  import 'leaflet/dist/leaflet.css'
 
   // Library imports:
   import L, { type LatLngExpression } from 'leaflet';
