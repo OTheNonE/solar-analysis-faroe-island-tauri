@@ -1,79 +1,22 @@
-import { fromArrayBuffer, type GeoTIFFImage } from 'geotiff';
+
 import { system } from 'src/lib/Stores';
 import { get } from 'svelte/store';
+import { getGeoTIFFImage, getBoundingBox } from './Functions/FetchFunctions';
+import type { GeoTIFFImage } from 'geotiff';
+import proj4 from 'proj4';
 
 // URLs:
-// var kortalUrl = 'https://gis.us.fo/arcgis/rest/services/dsm/FO_DSM_2017_2m/ImageServer'
-// var kortalUrl = 'https://gis.us.fo/arcgis/services/dsm/FO_DSM_2017_2m/ImageServer?wsdl'
-var kortalUrl = 'src/assets/FO_DSM_2017_FOTM_2M.tif'
-// var kortalJSONUrl = 'https://gis.us.fo/arcgis/rest/services/dsm/FO_DSM_2017_2m/ImageServer?f=pjson'
-var epsg5316Url = 'https://epsg.io/5316.proj4'
-var epsg4326Url = 'https://epsg.io/4326.proj4'
+var kortalUrl = 'src/assets/FO_DSM_2017_FOTM_25M_DEFLATE_UInt16.tif'
 
-// Retrieve JSON file belonging to the DSM map.
-// var kortalJSON;
-// fetch(kortalJSONUrl)
-//   .then((response) => response.json())
-//   .then((result) => {
-//     kortalJSON = result
-//     console.log("Kortal JSON er loada!")
-//     // console.log(kortalJSON)
-//   });
+// Define Faroese projection
+proj4.defs("EPSG:5316","+proj=tmerc +lat_0=0 +lon_0=-7 +k=0.999997 +x_0=200000 +y_0=-6000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs");
 
-
-fetch(epsg5316Url)
-  .then(response  => response.text())
-  .then(result    => {
-
-    get(system).coordinateSystem['EPSG5316'] = {
-      name: 'EPSG5316',
-      conv: result,
-    }
-
-    console.log("EPSG5316 (FAROE) er loada!")
-});
-
-fetch(epsg4326Url)
-  .then(response  => response.text())
-  .then(result    => {
-
-    get(system).coordinateSystem['EPSG4326'] = {
-      name: 'EPSG4326',
-      conv: result,
-    }
-
-    console.log("EPSG4326 er loada!")
-});
-
-fetch(kortalUrl)
-  .then(response  => response.arrayBuffer())
-  .then(tiff      => fromArrayBuffer(tiff))
-  .then(result    => result.getImage())
-  .then(image     => {
-    setHeightMapProperties(image)
-    console.log("Kortal HeightMap er loada!")
-})
-
-function setHeightMapProperties(image: GeoTIFFImage) {
-
-  const bbox = image.getBoundingBox();
-  
+// Load GeoTIFFImage
+getGeoTIFFImage(kortalUrl).then(image => {
   get(system).heightMap = {
     map: image,
-    boundingBox: {
-      xmin: bbox[0],
-      ymin: bbox[1],
-      xmax: bbox[2],
-      ymax: bbox[3],
-      width: bbox[2] - bbox[0],
-      height: bbox[3] - bbox[1],
-      pixelWidth: image.getWidth(),
-      pixelHeight: image.getHeight(),
-      widthRatio: (bbox[2] - bbox[0]) / image.getWidth(),
-      heightRatio: (bbox[3] - bbox[1]) / image.getHeight()
-    }
+    boundingBox: getBoundingBox(image)
   }
 
-  console.log(get(system).heightMap)
-
-}
+  console.log("Kortal HeightMap er loada!")
+})

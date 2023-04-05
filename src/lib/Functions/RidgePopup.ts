@@ -1,10 +1,12 @@
 import { convertF } from "./ConvertUnit"
 import { get } from 'svelte/store';
 import L, { type LatLngExpression } from 'leaflet';
-import { createRidge, getRidgePoints, getSingleHeight } from "./GetHeight"
+import { getHeight, getHeightFromREST } from "./GetHeight"
 import { system, type Pos, type Ridge } from "../Stores"
 import type { Crd } from "../Stores"
 import { waitForElm } from "./Functions";
+import { createRidge, getRidgePoints } from "./CalculateRidge";
+import { getBoundingBox } from "./FetchFunctions";
 
 waitForElm('#leafletmap').then(() => {
   system.update(o => {
@@ -19,10 +21,15 @@ waitForElm('#leafletmap').then(() => {
 async function onMapClick(e) {
 
   var crd: Crd = {lat: e.latlng.lat, lng: e.latlng.lng}
+
+  let image = get(system).heightMap.map;
+  let bbox = getBoundingBox(image);
   
   const pos = convertF.LatLngToPos(crd)
-  const px = convertF.PosToPixel(pos)
-  const height = await getSingleHeight(px)
+  const abs_pos = convertF.PosToAbsPos(pos);
+  const px = convertF.PosToPixel(pos, bbox)
+  const height = await getHeight(image, px) + 2
+  // const height = await getHeightFromREST(abs_pos) + 2
 
   system.update(o => {
 
@@ -41,7 +48,7 @@ function showCreateRidgePopup(crd: Crd, pos: Pos, height: number) {
 
       // Get values.
       let label = input.value
-      let ridgePoints = await getRidgePoints(pos, height, label)
+      let ridgePoints = await getRidgePoints(pos, height)
 
       // Create the mountain curve.
       let ridge = createRidge(label, ridgePoints, crd, height)

@@ -2,21 +2,31 @@
 <script lang="ts">
   
   // Imports from Stores.svelte:
-  import { onMount } from 'svelte';
   import { convertF } from './Functions/ConvertUnit';
   import { removeDecimals, waitForElm } from './Functions/Functions';
-  import { getSingleHeight } from './Functions/GetHeight';
+  import { getHeight, getHeightFromREST } from './Functions/GetHeight';
   import { system } from './Stores';
+  
 
   // Variables storing current position:
   export let pos = {x: '', y: ''};
   export let crd = {lng: '', lat: ''};
   export let level = '';
 
+  let executing = false;
+
   system.update(o => {
 
     waitForElm('#leafletmap').then(() => {
-      $system.map.on('mousemove', e => updateCurrentPosLevel(e))
+      $system.map.on('mousemove', async e => {
+    
+        if (!executing) {
+          executing = true
+          await updateCurrentPosLevel(e)
+          executing = false
+        }
+
+      })
     })
 
     return o
@@ -24,9 +34,13 @@
 
   async function updateCurrentPosLevel(e) {
     let crd_temp = {lat: e.latlng.lat, lng: e.latlng.lng}
+    let abs_pos_temp = convertF.LatLngToAbsPos(crd_temp);
     let pos_temp = convertF.LatLngToPos(crd_temp)
-    let px_temp = convertF.PosToPixel(pos_temp)
-    let level_temp = await getSingleHeight(px_temp)
+    let bbox = $system.heightMap.boundingBox;
+    let px = convertF.PosToPixel(pos_temp, bbox)
+
+    // let level_temp = await getHeight(px)
+    let level_temp = await getHeightFromREST(abs_pos_temp)
 
     pos = {
       x: pos_temp.x.toFixed(0),
@@ -38,8 +52,7 @@
       lat: crd_temp.lat.toFixed(5)
     }
 
-    level = level_temp.toFixed(1);
-
+    level = level_temp.toFixed(0);
   }
 
 </script>

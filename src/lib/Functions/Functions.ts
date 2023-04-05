@@ -1,4 +1,4 @@
-import type { Pos } from "../Stores";
+import type { Pos, Window } from "../Stores";
 
 export function angle360(v: number) {
   while (v < 0 || v >= 360) {
@@ -9,6 +9,26 @@ export function angle360(v: number) {
     }
   }
   return v
+}
+
+export function isOverlapping1D(line1: {min: number, max: number}, line2: {min: number, max: number}) {
+  return line1.max >= line2.min && line2.max >= line1.min
+}
+
+export function isOverlapping2D(box1: Window, box2: Window) {
+  return  isOverlapping1D({min: box1.xmin, max: box1.xmax}, {min: box2.xmin, max: box2.xmax}) && 
+          isOverlapping1D({min: box1.ymin, max: box1.ymax}, {min: box2.ymin, max: box2.ymax})
+}
+
+export function keepValueBetween(value, bottom, top) {
+  while (value < bottom || value >= top) {
+    if (value < bottom) {
+      value += top - bottom;
+    } else if (value >= top) {
+      value -= top - bottom;
+    }
+  }
+  return value
 }
 
 export function removeDecimals(value: number, decimals: number) {
