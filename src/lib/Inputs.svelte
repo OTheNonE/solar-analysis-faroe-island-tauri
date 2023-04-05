@@ -5,7 +5,7 @@
   import { system, type Pos } from 'src/lib/Stores';
   import ChartSettings from './ChartSettings.svelte';
   import { convertF } from './Functions/ConvertUnit';
-    import { getBoundingBox, getGeoTIFFImage } from './Functions/FetchFunctions';
+  import { getBoundingBox, getGeoTIFFImage } from './Functions/FetchFunctions';
 
   async function tester_1(e) {
     var kortalUrl = 'src/assets/FO_DSM_2017_FOTM_25M_DEFLATE_UInt16.tif'
