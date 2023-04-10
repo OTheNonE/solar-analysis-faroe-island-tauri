@@ -20,7 +20,7 @@
   // Yeaah...
   import * as only_for_compiling1 from 'src/lib/Load';
   import * as only_for_compiling2 from 'src/lib/Functions/RidgePopup';
-    import CurrentPosition from './lib/CurrentPosition.svelte';
+  import CurrentPosition from './lib/CurrentPosition.svelte';
 
   let rowSplitter //, columnSplitter;
 
