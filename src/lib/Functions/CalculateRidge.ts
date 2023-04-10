@@ -144,7 +144,7 @@ async function _getRidgePoints(pos_m: Pos, h_m: number, options: getRidgePointSe
     if (d_abs < d_min) continue;
 
     // Calculate the angle between the current position and marker:
-    let azi = Math.atan2(d.y, d.x) - Math.PI/2
+    let azi = -Math.atan2(d.y, d.x) + Math.PI/2
     if (azi < 0) {
       azi += 2 * Math.PI
     }

@@ -324,7 +324,7 @@ function updateSunDataset(dataset: ChartDataset, date: Date) {
     let sunPosition = SunCalc.getPosition(usedDate, 62, -7)
 
     let pos = {
-      x: angle360(-sunPosition.azimuth * 180 / Math.PI - 180),
+      x: angle360(sunPosition.azimuth * 180 / Math.PI - 180),
       y: sunPosition.altitude * 180 / Math.PI,
     }
 
